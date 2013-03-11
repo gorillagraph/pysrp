@@ -156,8 +156,10 @@ user.
   
     Return the name of the user this :class:`Verifier` object is for.
     
-  .. method:: Verifier.get_session_key()
-  
+  .. method:: Verifier.get_session_key([force=False])
+
+    *force* - return the session key even if the session has not been authenticated
+
     Return the session key for an authenticated user or None if the
     authentication failed or has not yet completed.
     
@@ -198,8 +200,10 @@ the user's password.
   
     Return the username passed to the constructor.
     
-  .. method:: User.get_session_key()
-  
+  .. method:: User.get_session_key([force=False])
+
+    *force* - return the session key even if the session has not been authenticated
+
     Return the session key if authentication succeeded or None if the
     authentication failed or has not yet completed.
     

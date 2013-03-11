@@ -1127,13 +1127,20 @@ static PyObject * usr_get_username( PyUser * self )
 }
 
 
-static PyObject * ver_get_session_key( PyVerifier * self )
+static PyObject * ver_get_session_key( PyVerifier * self , PyObject *args, PyObject *kwds )
 {
+    static char * kwnames[] = { "force", NULL };
+    int           force = 0;
+
+    if ( ! PyArg_ParseTupleAndKeywords(args, kwds, "|i", kwnames,
+                                       &force) )
+        return NULL;
+
     if ( self->ver == NULL ) {
         PyErr_SetString(PyExc_Exception, "Type not initialized");
         return NULL;
     }
-    if ( srp_verifier_is_authenticated(self->ver) )
+    if ( srp_verifier_is_authenticated(self->ver) || force )
     {
         int          key_len;
         const char * u = (const char *)srp_verifier_get_session_key(self->ver, &key_len);
@@ -1144,13 +1151,20 @@ static PyObject * ver_get_session_key( PyVerifier * self )
 }
 
 
-static PyObject * usr_get_session_key( PyUser * self )
+static PyObject * usr_get_session_key( PyUser * self, PyObject *args, PyObject *kwds )
 {
+    static char * kwnames[] = { "force", NULL };
+    int           force = 0;
+
+    if ( ! PyArg_ParseTupleAndKeywords(args, kwds, "|i", kwnames,
+                                       &force) )
+        return NULL;
+
     if ( self->usr == NULL ) {
         PyErr_SetString(PyExc_Exception, "Type not initialized");
         return NULL;
     }
-    if ( srp_user_is_authenticated(self->usr) )
+    if ( srp_user_is_authenticated(self->usr) || force )
     {
         int          key_len;
         const char * u = (const char *) srp_user_get_session_key(self->usr, &key_len);
@@ -1347,7 +1361,7 @@ static PyMethodDef PyVerifier_methods[] = {
     {"get_username", (PyCFunction) ver_get_username, METH_NOARGS,
             PyDoc_STR("Returns the username the Verifier instance is bound to.")
     },
-    {"get_session_key", (PyCFunction) ver_get_session_key, METH_NOARGS,
+    {"get_session_key", (PyCFunction) ver_get_session_key, METH_KEYWORDS,
             PyDoc_STR("Returns the session key for an authenticated session. "
                       "Returns None if the session is not authenticated.")
     },
@@ -1372,7 +1386,7 @@ static PyMethodDef PyUser_methods[] = {
     {"get_username", (PyCFunction) usr_get_username, METH_NOARGS,
             PyDoc_STR("Returns the username the User instance is bound to.")
     },
-    {"get_session_key", (PyCFunction) usr_get_session_key, METH_NOARGS,
+    {"get_session_key", (PyCFunction) usr_get_session_key, METH_KEYWORDS,
             PyDoc_STR("Returns the session key for an authenticated session. "
                       "Returns None if the session is not authenticated.")
     },

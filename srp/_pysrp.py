@@ -265,8 +265,8 @@ class Verifier (object):
         return self.I
     
         
-    def get_session_key(self):
-        return self.K if self._authenticated else None
+    def get_session_key(self, force=False):
+        return self.K if self._authenticated or force else None
         
     # returns (bytes_s, bytes_B) on success, (None,None) if SRP-6a safety check fails
     def get_challenge(self):
@@ -316,8 +316,8 @@ class User (object):
         return self.username
     
     
-    def get_session_key(self):
-        return self.K if self._authenticated else None
+    def get_session_key(self, force=False):
+        return self.K if self._authenticated or force else None
     
     
     def start_authentication(self):
