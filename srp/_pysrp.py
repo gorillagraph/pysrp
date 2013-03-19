@@ -249,7 +249,7 @@ class Verifier (object):
         if not self.safety_failed:
             
             self.b = get_random( 32 )
-            self.B = (k*self.v + pow(g, self.b, N)) % N
+            self.B = k*self.v + pow(g, self.b, N)
             self.u = H(hash_class, self.A, self.B)
             self.S = pow(self.A*pow(self.v, self.u, N ), self.b, N)
             self.K = hash_class( long_to_bytes(self.S) ).digest()
