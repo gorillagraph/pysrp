@@ -18,6 +18,7 @@ import sys
 import hashlib
 import random
 import ctypes
+from ctypes.util import find_library
 import time
 
 
@@ -131,7 +132,9 @@ FC026E479558E4475677E9AA9E3050E2765694DFC81F56E880B96E71\
 
 dlls = list()
 
-if 'win' in sys.platform:
+if sys.platform == "darwin":
+  dlls.append(ctypes.CDLL(find_library("ssl")))
+elif 'win' in sys.platform:
     for d in ('libeay32.dll', 'libssl32.dll', 'ssleay32.dll'):
         try:
             dlls.append( ctypes.cdll.LoadLibrary(d) )
