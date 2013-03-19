@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import thread
+import base64
 
 this_dir = os.path.dirname( os.path.abspath(__file__) )
     
@@ -49,6 +50,12 @@ FBB694B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F9E4AFF73'''
 
 
 class SRPTests( unittest.TestCase ):
+    longMessage = True
+
+    def get_hash_digest_length(self, hash_alg):
+        hash_class = _pysrp._hash_map[hash_alg]
+        h = hash_class()
+        return len(h.hexdigest())
 
     def doit(self, u_mod, v_mod, g_mod, hash_alg=srp.SHA1, ng_type=srp.NG_2048, n_hex='', g_hex=''):
         User                           = u_mod.User
@@ -76,6 +83,39 @@ class SRPTests( unittest.TestCase ):
         # HAMK => client
         usr.verify_session( HAMK )
 
+        if ng_type == srp.NG_CUSTOM:
+            key_length = len(n_hex)
+        else:
+            N, g = _pysrp._ng_const[ng_type]
+            key_length = len(N)
+        hash_digest_length = self.get_hash_digest_length(hash_alg)
+
+        self.assertEqual(
+            len(base64.b16encode(A)),
+            key_length,
+            "Incorrect length for client public ephemeral value %d != %d"
+        )
+        self.assertEqual(
+            len(base64.b16encode(B)),
+            key_length + hash_digest_length,
+            "Incorrect length for server public ephemeral value"
+        )
+        self.assertEqual(
+            len(base64.b16encode(_v)),
+            key_length,
+            "Incorrect length for verifier"
+        )
+        self.assertEqual(
+            len(base64.b16encode(_s)),
+            8,
+            "Incorrect length for salt"
+        )
+        self.assertEqual(
+            len(base64.b16encode(M)),
+            hash_digest_length,
+            "Incorrect length for session key verifier"
+        )
+
         self.assertTrue( svr.authenticated() and usr.authenticated() )
 
     def test_pure_python_defaults(self):
@@ -86,6 +126,12 @@ class SRPTests( unittest.TestCase ):
 
     def test_c_defaults(self):
         self.doit( _srp, _srp, _srp )
+
+    def test_NG_1024(self):
+        self.doit( _srp, _srp, _srp, ng_type=srp.NG_1024 )
+
+    def test_pure_python_NG_1024(self):
+        self.doit( _pysrp, _pysrp, _pysrp, ng_type=srp.NG_1024 )
 
     def test_mix1(self):
         self.doit( _pysrp, _ctsrp, _srp )
