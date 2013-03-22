@@ -193,7 +193,7 @@ def create_salted_verification_key( username, password, hash_alg=SHA1, ng_type=N
         raise ValueError("Both n_hex and g_hex are required when ng_type = NG_CUSTOM")
     hash_class = _hash_map[ hash_alg ]
     N,g = get_ng( ng_type, n_hex, g_hex )
-    _s = long_to_bytes( get_random( 4 ) )
+    _s = long_to_bytes( get_random( 8 ) )
     _v = long_to_bytes( pow(g,  gen_x( hash_class, _s, username, password ), N) )
     
     return _s, _v
