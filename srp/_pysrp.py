@@ -199,6 +199,30 @@ def create_salted_verification_key( username, password, hash_alg=SHA1, ng_type=N
     return _s, _v
     
 
+def calculate_k(hash_class, N, g):
+    return hash_padded_pair(hash_class, N, N, g)
+
+
+def calculate_u(hash_class, N, A, B):
+    return hash_padded_pair(hash_class, N, A, B)
+
+
+def hash_padded_pair(hash_class, N, value1, value2):
+    pad_length = (N.bit_length() + 7) / 8
+
+    value1_padded = get_padded_value(value1, pad_length)
+    value2_padded = get_padded_value(value2, pad_length)
+
+    return H(hash_class, value1_padded, value2_padded)
+
+
+def get_padded_value(value, pad_length):
+    byte_array = long_to_bytes(value)
+    if len(byte_array) < pad_length:
+        byte_array = unichr(0) * (pad_length - len(byte_array)) + byte_array
+
+    return byte_array
+
     
 def calculate_M( hash_class, N, g, I, s, A, B, K ):
     h = hash_class()
@@ -234,7 +258,7 @@ class Verifier (object):
         
         N,g        = get_ng( ng_type, n_hex, g_hex )
         hash_class = _hash_map[ hash_alg ]
-        k          = H( hash_class, N, g )
+        k          = calculate_k(hash_class, N, g)
         
         self.hash_class = hash_class
         self.N          = N
@@ -250,7 +274,7 @@ class Verifier (object):
             
             self.b = get_random( 32 )
             self.B = k*self.v + pow(g, self.b, N)
-            self.u = H(hash_class, self.A, self.B)
+            self.u = calculate_u(hash_class, N, self.A, self.B)
             self.S = pow(self.A*pow(self.v, self.u, N ), self.b, N)
             self.K = hash_class( long_to_bytes(self.S) ).digest()
             self.M = calculate_M( hash_class, N, g, self.I, self.s, self.A, self.B, self.K )
@@ -290,7 +314,7 @@ class User (object):
             raise ValueError("Both n_hex and g_hex are required when ng_type = NG_CUSTOM")
         N,g        = get_ng( ng_type, n_hex, g_hex )
         hash_class = _hash_map[ hash_alg ]
-        k          = H( hash_class, N, g )
+        k          = calculate_k(hash_class, N, g)
         
         self.I     = username
         self.p     = password
@@ -340,7 +364,7 @@ class User (object):
         if (self.B % N) == 0:
             return None
         
-        self.u = H( hash_class, self.A, self.B )
+        self.u = calculate_u(hash_class, N, self.A, self.B)
         
         # SRP-6a safety check
         if self.u == 0:
