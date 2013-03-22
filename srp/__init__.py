@@ -2,6 +2,7 @@
 _mod     = None
 
 try:
+    raise ImportError
     import srp._srp
     _mod = srp._srp
 except ImportError:
@@ -9,6 +10,7 @@ except ImportError:
 
 if not _mod:
     try:
+        raise ImportError
         import srp._ctsrp
         _mod = srp._ctsrp
     except ImportError:
