@@ -107,7 +107,7 @@ class SRPTests( unittest.TestCase ):
         )
         self.assertEqual(
             len(base64.b16encode(_s)),
-            8,
+            16,
             "Incorrect length for salt"
         )
         self.assertEqual(
