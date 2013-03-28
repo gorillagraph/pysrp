@@ -219,7 +219,7 @@ def hash_padded_pair(hash_class, N, value1, value2):
 def get_padded_value(value, pad_length):
     byte_array = long_to_bytes(value)
     if len(byte_array) < pad_length:
-        byte_array = unichr(0) * (pad_length - len(byte_array)) + byte_array
+        byte_array = chr(0) * (pad_length - len(byte_array)) + byte_array
 
     return byte_array
 
